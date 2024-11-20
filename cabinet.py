@@ -12,32 +12,33 @@
 
 from itertools import combinations
 
+
 class Game:
     def __init__(self, num_rows: int, cabinets_per_row: int, selection: list[int]):
         self.rows = num_rows
         self.cabinets_per_row = cabinets_per_row
         self.selection = selection
-    
+
     def __player_one_scan(self) -> list[int]:
         return list(range(1, self.cabinets_per_row * self.rows + 1))
-    
+
     def __player_two_scan(self) -> list[int]:
         scan = []
         for col in range(1, self.cabinets_per_row + 1):
             scan += list(col + r * self.cabinets_per_row for r in range(self.rows))
         return scan
-        
+
     def __player_step(self, scan) -> int:
         for idx, cabinet in enumerate(scan):
             if cabinet in self.selection:
                 return idx
-    
+
     def __player_one_step(self) -> int:
         return self.__player_step(self.__player_one_scan())
-    
+
     def __player_two_step(self) -> int:
         return self.__player_step(self.__player_two_scan())
-    
+
     PLAYER_ONE_WIN = 1
     PLAYER_TWO_WIN = 2
     DRAW = 0
@@ -51,45 +52,54 @@ class Game:
             return Game.PLAYER_TWO_WIN
         else:
             return Game.DRAW
-    
+
     def __str__(self):
         return f"Selection: {self.selection}, Player 1 finding step: {self.__player_one_step()}, Player 2 finding step: {self.__player_two_step()}"
+
 
 class GamesGen:
     def __init__(self, num_rows: int, cabinets_per_row: int, num_selections: int):
         self.num_rows = num_rows
         self.cabinets_per_row = cabinets_per_row
         self.num_selections = num_selections
-    
+
     def __iter__(self):
         num_cabinets = self.num_rows * self.cabinets_per_row
         for selection in combinations(range(1, num_cabinets + 1), self.num_selections):
             yield Game(self.num_rows, self.cabinets_per_row, list(selection))
 
+
 class ScoreAccumulator:
     def __init__(self):
         self.scores = {Game.PLAYER_ONE_WIN: 0, Game.PLAYER_TWO_WIN: 0, Game.DRAW: 0}
-    
+
     def add(self, score: int):
         self.scores[score] += 1
-    
+
     def __str__(self):
         return f"Player 1 wins: {self.scores[Game.PLAYER_ONE_WIN]}, Player 2 wins: {self.scores[Game.PLAYER_TWO_WIN]}, Draws: {self.scores[Game.DRAW]}"
-    
+
     def ratio(self) -> float:
-        total_wins = (self.scores[Game.PLAYER_TWO_WIN] + self.scores[Game.PLAYER_ONE_WIN])
+        total_wins = self.scores[Game.PLAYER_TWO_WIN] + self.scores[Game.PLAYER_ONE_WIN]
         if total_wins == 0:
             return 0.0  # no winners means no chance of winning
         return self.scores[Game.PLAYER_ONE_WIN] / total_wins
 
+
 def parse_args():
     import argparse as ap
+
     parser = ap.ArgumentParser()
     parser.add_argument("num_rows", type=int, help="Number of rows of cabinets")
     parser.add_argument("cabinets_per_row", type=int, help="Number of cabinets per row")
-    parser.add_argument("num_selections", type=int, help="Number of cabinets with prizes")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Print verbose output")
+    parser.add_argument(
+        "num_selections", type=int, help="Number of cabinets with prizes"
+    )
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Print verbose output"
+    )
     return parser.parse_args()
+
 
 def main():
     args = parse_args()
@@ -101,6 +111,7 @@ def main():
         scores.add(game.score())
     print(scores)
     print(f"Player 1 win ratio: {scores.ratio()}")
+
 
 if __name__ == "__main__":
     main()
