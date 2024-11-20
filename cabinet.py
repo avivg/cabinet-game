@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 # This script is a solution to the "Cabinet Game" problem.
 # The problem is as follows:
 # There are N rows of cabinets, each row containing M cabinets.
@@ -72,18 +70,19 @@ class GamesGen:
 class ScoreAccumulator:
     def __init__(self):
         self.scores = {Game.PLAYER_ONE_WIN: 0, Game.PLAYER_TWO_WIN: 0, Game.DRAW: 0}
+        self.games = 0
 
     def add(self, score: int):
         self.scores[score] += 1
+        self.games += 1
 
     def __str__(self):
         return f"Player 1 wins: {self.scores[Game.PLAYER_ONE_WIN]}, Player 2 wins: {self.scores[Game.PLAYER_TWO_WIN]}, Draws: {self.scores[Game.DRAW]}"
 
-    def ratio(self) -> float:
-        total_wins = self.scores[Game.PLAYER_TWO_WIN] + self.scores[Game.PLAYER_ONE_WIN]
-        if total_wins == 0:
-            return 0.0  # no winners means no chance of winning
-        return self.scores[Game.PLAYER_ONE_WIN] / total_wins
+    def ratio(self, score: int) -> float:
+        if self.games == 0:
+            return 0.0  # no games means no chance of winning
+        return self.scores[score] / self.games
 
 
 def parse_args():
@@ -110,7 +109,9 @@ def main():
             print(game)
         scores.add(game.score())
     print(scores)
-    print(f"Player 1 win ratio: {scores.ratio()}")
+    print(f"Player 1 win ratio: {scores.ratio(Game.PLAYER_ONE_WIN)}")
+    print(f"Player 2 win ratio: {scores.ratio(Game.PLAYER_TWO_WIN)}")
+    print(f"Draw ratio: {scores.ratio(Game.DRAW)}")
 
 
 if __name__ == "__main__":
